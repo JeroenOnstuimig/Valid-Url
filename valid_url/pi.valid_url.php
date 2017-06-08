@@ -36,6 +36,15 @@ in this Software without prior written authorization from EllisLab, Inc.
  * @copyright		Copyright (c) 2004 - 2015, EllisLab, Inc.
  * @link			https://github.com/EllisLab/Valid-Url
  */
+$plugin_info = array(
+						'pi_name'			=> 'Valid URL',
+						'pi_version'		=> '2.1',
+						'pi_author'			=> 'EllisLab - edited by Onstuimig ~ Jeroen Rothbauer',
+						'pi_author_url'		=> 'https://ellislab.com/',
+						'pi_description'	=> 'Generates a URL valid for use in XHTML as an href or src attribute',
+						'pi_usage'			=> Valid_url::usage()
+					);
+					
 class Valid_url {
 
 	public $return_data = '';
@@ -49,7 +58,7 @@ class Valid_url {
 	function __construct($str = '')
 	{
 		// characters we don't want urlencoded
-		$protected = array('&' => 'AMPERSANDMARKER', '/' => 'SLASHMARKER', '=' => 'EQUALSMARKER');
+		$protected = array('&' => 'AMPERSANDMARKER', '/' => 'SLASHMARKER', '=' => 'EQUALSMARKER', '#' => 'HASHMARKER');
 
 		if ($str == '')
 		{
@@ -67,10 +76,18 @@ class Valid_url {
 		}
 
 		// error trapping for seriously malformed URLs, take 2
-		if ( ! isset($url['scheme']) && ($url = @parse_url("http://{$str}")) === FALSE)
-		{
-			ee()->TMPL->log_item('Valid URL Plugin error: unable to parse URL '.htmlentities($str));
-			return;
+		if( $str[0]=='/' ){
+			if (($url = @parse_url($str)) === FALSE)
+			{
+				ee()->TMPL->log_item('Valid URL Plugin error: unable to parse URL '.htmlentities($str));
+				return;
+			}
+		}else{
+			if ( ! isset($url['scheme']) && ($url = @parse_url("http://{$str}")) === FALSE)
+			{
+				ee()->TMPL->log_item('Valid URL Plugin error: unable to parse URL '.htmlentities($str));
+				return;
+			}
 		}
 
 		foreach ($url as $key => $value)
@@ -84,11 +101,47 @@ class Valid_url {
 					$url[$key] = '?'.urlencode(str_replace(array_keys($protected), $protected, $value));
 					break;
 				case 'scheme':
-					$url[$key] .= ($value == 'file') ? ':///' : '://';
+					$url[$key] .= ($value == 'file') ? ':///' : (($value == 'mailto') ? ':' : '://');
+					break;
+				case 'fragment': 
+					$url[$key] = '#'.urlencode(str_replace(array_keys($protected), $protected, $value));
 					break;
 			}
 		}
 
 		$this->return_data = implode('', str_replace('&', '&amp;', str_replace($protected, array_keys($protected), $url)));
+	}
+	// --------------------------------------------------------------------
+	
+	/**
+	 * Usage
+	 *
+	 * @access	public
+	 * @return	string
+	 */
+	static function usage()
+	{
+		return <<<ONESY
+		Makes sure that a URL has a protocol, that ampersands are converted to entities, and all
+		other characters are properly URL encoded.
+		
+		{exp:valid_url}www.example.com/foo bar/bat?=bag&mice=men!{/exp:valid_url}
+		
+		Produces:
+		http://www.example.com/foo+bar/bat?=bag&amp;mice=men%21
+		
+		Version 2.1 - Onstuimig
+		******************
+		- Added mailto, relative URL and hash fragment support
+		
+		Version 2.0
+		******************
+		- Updated plugin to be 3.0 compatible
+		
+		Version 1.1
+		******************
+		- Updated plugin to be 2.0 compatible
+		
+ONESY;
 	}
 }

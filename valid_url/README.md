@@ -21,6 +21,10 @@ http://www.example.com/foo+bar/bat?=bag&amp;mice=men%21
 
 ## Change Log
 
+### 2.1 - Onstuimig
+
+- Added mailto, relative URL and hash fragment support
+
 ### 2.0
 
 - Updated plugin to be 3.0 compatible
