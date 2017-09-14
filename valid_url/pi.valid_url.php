@@ -38,7 +38,7 @@ in this Software without prior written authorization from EllisLab, Inc.
  */
 $plugin_info = array(
 						'pi_name'			=> 'Valid URL',
-						'pi_version'		=> '2.1',
+						'pi_version'		=> '2.2',
 						'pi_author'			=> 'EllisLab - edited by Onstuimig ~ Jeroen Rothbauer',
 						'pi_author_url'		=> 'https://ellislab.com/',
 						'pi_description'	=> 'Generates a URL valid for use in XHTML as an href or src attribute',
@@ -76,7 +76,7 @@ class Valid_url {
 		}
 
 		// error trapping for seriously malformed URLs, take 2
-		if( $str[0]=='/' ){
+		if( $str[0]=='/' || $str[0]=='#' ){
 			if (($url = @parse_url($str)) === FALSE)
 			{
 				ee()->TMPL->log_item('Valid URL Plugin error: unable to parse URL '.htmlentities($str));
@@ -129,6 +129,10 @@ class Valid_url {
 		
 		Produces:
 		http://www.example.com/foo+bar/bat?=bag&amp;mice=men%21
+		
+		Version 2.2 - Onstuimig
+		******************
+		- Support URLs starting with hash
 		
 		Version 2.1 - Onstuimig
 		******************
