@@ -67,6 +67,12 @@ class Valid_url {
 
 		// decode first since we'll do our own encoding later
 		$str = str_replace(SLASH, '/', trim(urldecode(str_replace('&amp;', '&', $str))));
+		
+		// ignore empty input
+		if (empty($str))
+		{
+			return;
+		}
 
 		// error trapping for seriously malformed URLs, take 1
 		if (($url = @parse_url($str)) === FALSE)
